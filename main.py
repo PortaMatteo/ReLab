@@ -6,10 +6,13 @@ from flask import request
 from flask_pymongo import PyMongo
 from flask_cors import CORS
 
+import geojson
+import shapely.wkt
+
 app = Flask(__name__)
 
 # Stringa di connessione al DB
-app.config["MONGO_URI"] = "mongodb+srv://portamatteo:1AMSCIssZVzVObn5@cluster0.yair6of.mongodb.net/ReLab" #Importante qui va specificato il nome del DB
+app.config["MONGO_URI"] = "mongodb+srv://portamatteo:jps7nUxg7TpLysIc@cluster0.yair6of.mongodb.net/ReLab" #Importante qui va specificato il nome del DB
 
 mongo = PyMongo(app)
 # Per rispondere alle chiamate cross origin
@@ -73,6 +76,11 @@ def get_all_stars():
     mil4326WKT = mongo.db.MilWKT4326
     output = []
 
+    match = {
+        '$match': {
+            'EP_H_ND': {'$gt': 0}
+        }
+    }
     group = {
         '$group': {
             '_id': {
@@ -87,11 +95,16 @@ def get_all_stars():
             }
         }
     }
-
-    for s in mil4326WKT.aggregate([group]):
-        output.append({'somma': s['SUM'], 'media': s['AVG'],
-                      'WKT': s['_id']['WKT'], 'SEZ': s['_id']['SEZ']})
-    return jsonify({'result': output})    
+    limit = {
+        '$limit' : 10
+    }
+    
+    for s in mil4326WKT.aggregate([match, group, limit]):
+        g1= shapely.wkt.loads(s['_id']['WKT'])
+        g2 = geojson.Feature(geometry=g1, 
+        properties={'id':s['_id']['SEZ'], 'media':s['AVG'], 'somma':s['SUM'], 'sezione':s['_id']['SEZ']}) 
+        output.append(g2)                 
+    return jsonify({'result': output})
 
 # Checks to see if the name of the package is the run as the main package.
 if __name__ == "__main__":
