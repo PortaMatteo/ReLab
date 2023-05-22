@@ -15,3 +15,20 @@
 #map {
   height: 100%;
 }
+
+form {
+  left: 50%;
+  top: 15%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  z-index: 30000;
+
+  background-color: #00f;
+  padding: 20px 30px;
+  border-radius: 10px;
+}
+
+form h3 {
+  margin: 0;
+  color: white;
+}

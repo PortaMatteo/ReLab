@@ -3,3 +3,12 @@
     <div id="map"></div>
   </div>
 </div>
+<form>
+  <h3 >Vettori energetici</h3>
+  <div>
+    <input name="title" #foglio placeholder="Seleziona foglio">
+  </div>
+  <button (click)="cambiaFoglio(foglio)"> <!--Passiamo le variabili come parametro --> 
+    Cambia
+  </button>
+</form>
