@@ -50,7 +50,7 @@ def get_vettore(foglio):
             "FOGLIO":s["FOGLIO"],
             "CI_VETTORE":s['CI_VETTORE']
         })
-    return jsonify({'result': output})    
+    return jsonify(output)    
 
 @app.route('/ci_vettore/sezione/<sezione>', methods=['GET'])
 def get_vettore_sezione(sezione):
