@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { AfterViewInit, Component } from '@angular/core';
 import * as L from 'leaflet';
+import '@geoman-io/leaflet-geoman-free';
+
 import { Ci_vettore } from 'src/models/ci_vett.model';
 import { GeoFeatureCollection } from 'src/models/geojson.model';
 
@@ -20,6 +22,18 @@ export class MapComponent implements AfterViewInit {
       zoom: 16,
     });
 
+    this.map.pm.addControls({
+      drawCircle: true,
+      drawMarker: false,
+      drawCircleMarker: false,
+      drawPolyline: false,
+      drawRectangle: false,
+      drawPolygon: false,
+      drawText: false,
+      cutPolygon: false,
+      rotateMode: false,
+    });
+
     const tiles = L.tileLayer(
       'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       {
@@ -31,6 +45,10 @@ export class MapComponent implements AfterViewInit {
     );
 
     tiles.addTo(this.map);
+
+    this.map.on('click', (e) => {
+      this.map.panTo(e.latlng);
+    });
   }
 
   constructor(private http: HttpClient) {}
@@ -82,11 +100,9 @@ export class MapComponent implements AfterViewInit {
   }
 
   cambiaFoglio(foglio: any): boolean {
-    let val = foglio.value; //Commenta qui
     this.http
-      .get<Ci_vettore[]>(`http://127.0.0.1:5000/ci_vettore/${val}`)
+      .get<Ci_vettore[]>(`http://127.0.0.1:5000/ci_vettore/${foglio}`)
       .subscribe(this.prepareCiVettData); //Commenta qui
-    console.log(val);
     return false;
   }
 

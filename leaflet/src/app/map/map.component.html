@@ -8,7 +8,7 @@
   <div>
     <input name="title" #foglio placeholder="Seleziona foglio">
   </div>
-  <button (click)="cambiaFoglio(foglio)"> <!--Passiamo le variabili come parametro --> 
+  <button (click)="cambiaFoglio(foglio.value)"> <!--Passiamo le variabili come parametro --> 
     Cambia
   </button>
 </form>
