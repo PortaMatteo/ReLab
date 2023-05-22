@@ -33,7 +33,7 @@ def get_all_addresses():
         output.append(s['INDIRIZZO'] + '|' + s['CI_VETTORE'])
     return jsonify({'result': output })
 
-@app.route('/ci_vettore/<foglio>', methods=['GET'])
+@app.route('/ci_vettore/<int:foglio>', methods=['GET'])
 def get_vettore(foglio):
     mil4326WKT = mongo.db.MilWKT4326
     output = []
@@ -153,4 +153,4 @@ def get_avg(lng, lat, r):
 # Checks to see if the name of the package is the run as the main package.
 if __name__ == "__main__":
     # Runs the Flask application only if the main.py file is being run.
-    app.run()
+    app.run(debug=True)
