@@ -54,11 +54,24 @@ export class MapComponent implements AfterViewInit {
     for (const iterator of data) {
       //Per ogni oggetto del vettore creo un Marker
       const marker = new L.Marker([iterator.WGS84_X, iterator.WGS84_Y])
-        .setIcon(L.icon({ iconUrl: 'assets/icon.png' , iconSize: [64, 64]}))
+        .setIcon(this.findImage(iterator.CI_VETTORE))
         .bindPopup(iterator.INDIRIZZO);
       // .setIcon(this.findImage(iterator.CI_VETTORE));
       marker.addTo(this.map);
       this.markerList.push(marker);
     }
   };
+
+  findImage(label: string): L.Icon {
+    var iconOptions = { iconSize: [64, 64], iconUrl: 'assets/questionMark.webp' };
+
+    if (label.includes('Gas')) {
+      iconOptions.iconUrl = 'assets/gas.png';
+    }
+    if (label.includes('elettrica')) {
+      iconOptions.iconUrl = 'assets/bolt.png';
+    }
+
+    return L.icon(iconOptions as any);
+  }
 }
