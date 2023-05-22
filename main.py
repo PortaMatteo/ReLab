@@ -12,7 +12,7 @@ import shapely.wkt
 app = Flask(__name__)
 
 # Stringa di connessione al DB
-app.config["MONGO_URI"] = "mongodb+srv://portamatteo:jps7nUxg7TpLysIc@cluster0.yair6of.mongodb.net/ReLab" #Importante qui va specificato il nome del DB
+app.config["MONGO_URI"] = "mongodb+srv://portamatteo:tOTrUCEVuOGtLjaU@cluster0.yair6of.mongodb.net/ReLab" #Importante qui va specificato il nome del DB
 
 mongo = PyMongo(app)
 # Per rispondere alle chiamate cross origin
@@ -105,6 +105,50 @@ def get_all_stars():
         properties={'id':s['_id']['SEZ'], 'media':s['AVG'], 'somma':s['SUM'], 'sezione':s['_id']['SEZ']}) 
         output.append(g2)                 
     return jsonify({'result': output})
+
+@app.route('/geogeom/<float:lng>/<float:lat>/<float:r>', methods=['GET'])
+def get_avg(lng, lat, r):
+    print(type(lng))
+    mil4326WKT = mongo.db.MilWKT4326
+    output = []
+
+    match = {
+        '$match': {
+            '$and':
+            [
+                {'EP_H_ND': {'$gt': 0}},
+                {'WGS84_X': {'$gt': lng - r}},
+                {'WGS84_X': {'$lt': lng + r}},
+                {'WGS84_Y': {'$gt': lat - r}},
+                {'WGS84_Y': {'$lt': lat + r}}
+            ]
+        }
+    }
+    group = {
+        '$group': {
+            '_id': {
+                'SEZ': '$SEZ',
+                'WKT': '$WKT'
+            },
+            'AVG': {
+                '$avg': '$EP_H_ND'
+            },
+            'SUM': {
+                '$sum': '$EP_H_ND'
+            }
+        }
+    }
+    limit = {
+        '$limit': 10
+    }
+
+    for s in mil4326WKT.aggregate([match, group, limit]):
+        # Converte da WKT in GeoJson Geometry
+        g1 = shapely.wkt.loads(s['_id']['WKT'])
+        g2 = geojson.Feature(geometry=g1,
+                             properties={'id': s['_id']['SEZ'], 'media': s['AVG'], 'somma': s['SUM'], 'sezione': s['_id']['SEZ']})
+        output.append(g2)
+    return jsonify(geojson.FeatureCollection(output))
 
 # Checks to see if the name of the package is the run as the main package.
 if __name__ == "__main__":
