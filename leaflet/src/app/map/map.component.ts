@@ -49,6 +49,23 @@ export class MapComponent implements AfterViewInit {
     this.map.on('click', (e) => {
       this.map.panTo(e.latlng);
     });
+
+    this.map.on('pm:create', ({ layer }: any) => {
+      layer.on('pm:edit', (e: any) => {});
+
+      layer.on('pm:remove', (e: any) => {
+        var radius = layer._mRadius;
+        var lat = layer._latlng.lat;
+        var lng = layer._latlng.lng;
+        console.log(lng, lat, radius);
+
+        this.http
+          .get<Ci_vettore[]>(
+            `http://127.0.0.1:5000/geogeom/${lng}/${lat}/${radius}`
+          )
+          .subscribe(this.prepareCiVettData);
+      });
+    });
   }
 
   constructor(private http: HttpClient) {}
