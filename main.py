@@ -114,17 +114,30 @@ def get_avg(lng, lat, r):
     mil4326WKT = mongo.db.MilWKT4326
     output = []
 
-    query = {
-        "$and": [
-            {"EP_H_ND": {"$gt": 0}},
-            {"WGS84_X": {"$gt": lat - r}},
-            {"WGS84_X": {"$lt": lat + r}},
-            {"WGS84_Y": {"$gt": lng - r}},
-            {"WGS84_Y": {"$lt": lng + r}},
-        ]
-    }
+    query = [
+        {
+            "$project": {
+                "distance": {
+                    "$sqrt": {
+                        "$add": [
+                            {"$pow": [{"$subtract": ["$WGS84_X", lat]}, 2]},
+                            {"$pow": [{"$subtract": ["$WGS84_Y", lng]}, 2]},
+                        ]
+                    }
+                },
+                "INDIRIZZO": True,
+                "WGS84_X": True,
+                "WGS84_Y": True,
+                "CLASSE_ENE": True,
+                "EP_H_ND": True,
+                "FOGLIO": True,
+                "CI_VETTORE": True,
+            },
+        },
+        {"$match": {"distance": {"$lt": r}}},
+    ]
 
-    for s in mil4326WKT.find(query):
+    for s in mil4326WKT.aggregate(query):
         output.append(
             {
                 "INDIRIZZO": s["INDIRIZZO"],
